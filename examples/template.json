@@ -1,0 +1,36 @@
+{
+    "name": "SbfDetSeparacao70030 - Centauro Stress Test",
+    "method": "POST",
+    "url": "https://kafka-proxy-api.dev.gcp.gruposbf.com.br/v2/publish",
+    "headers": {
+        "Content-Type": "application/json",
+        "x-client-id": "SAP",
+        "x-token": "cabffaf54a61c6ff47df5bea2a2e1be959a7b46f"
+    },
+    "k6_options": {
+        "vus": 10,
+        "duration": "30s"
+    },
+    "payload": {
+        "business_unit": "CENTAURO",
+        "type": "SbfDetSeparacao70030",
+        "identifier": "$randomString(8,12)",
+        "total_records": "$totalItems(data)",
+        "data": {
+            "$type": "array",
+            "$id": "data",
+            "$minItems": 1,
+            "$maxItems": 10,
+            "$itemTemplate": {
+                "cd_empresa": "$randomNumber(1,9999)",
+                "cd_colmeia": "$randomString(3,8)",
+                "cd_destino_separacao": "$randomNumber(1,999)",
+                "cd_grupo_separacao": "$randomNumber(1,999)",
+                "cd_funcionario": "$toNumber(#otherVar)",
+                "dt_separacao": "$randomDate(2020-01-01,2026-12-31)",
+                "dt_nota_fiscal": "$randomDate(2020-01-01,2026-12-31)",
+                "dt_addrow": "$customFunction()"
+            }
+        }
+    }
+}
