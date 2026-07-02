@@ -1,18 +1,18 @@
 {
-    "name": "SbfDetSeparacao70030 - Centauro Stress Test",
+    "name": "SbfDetSeparacao70030 - COMPANY Stress Test",
     "method": "POST",
-    "url": "https://kafka-proxy-api.dev.gcp.gruposbf.com.br/v2/publish",
+    "url": "https://example.com/api/v1/test",
     "headers": {
         "Content-Type": "application/json",
-        "x-client-id": "SAP",
-        "x-token": "cabffaf54a61c6ff47df5bea2a2e1be959a7b46f"
+        "x-client-id": "TEST",
+        "x-token": "d8nb3x3eyb27xeb"
     },
     "k6_options": {
         "vus": 10,
         "duration": "30s"
     },
     "payload": {
-        "business_unit": "CENTAURO",
+        "business_unit": "COMPANY",
         "type": "SbfDetSeparacao70030",
         "identifier": "$randomString(8,12)",
         "total_records": "$totalItems(data)",

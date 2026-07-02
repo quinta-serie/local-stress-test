@@ -224,9 +224,9 @@ export const customFunctions = {
 
 ```json
 {
-    "name": "SbfDetSeparacao70030 - Centauro Stress Test",
+    "name": "SbfDetSeparacao70030 - COMPANY Stress Test",
     "method": "POST",
-    "url": "https://kafka-proxy-api.dev.gcp.example.com/v2/publish",
+    "url": "https://example.com/api/v1/test",
     "headers": {
         "Content-Type": "application/json",
         "x-client-id": "SAP",
@@ -237,7 +237,7 @@ export const customFunctions = {
         "duration": "30s"
     },
     "payload": {
-        "business_unit": "CENTAURO",
+        "business_unit": "COMPANY",
         "type": "SbfDetSeparacao70030",
         "identifier": "$randomString(8,12)",
         "total_records": "$totalItems(data)",
@@ -265,7 +265,7 @@ export const customFunctions = {
 
 ```json
 {
-    "business_unit": "CENTAURO",
+    "business_unit": "COMPANY",
     "type": "SbfDetSeparacao70030",
     "identifier": "aB3xZqLm",
     "total_records": 2,
