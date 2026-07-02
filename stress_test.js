@@ -206,6 +206,32 @@ function resolveValue(v, registry) {
   return callFn(ph.name, ph.args, registry);
 }
 
+/**
+ * Resolve header values. Supports two syntaxes:
+ *   "#varName"          — direct env var reference (e.g. "#xToken" → __ENV.xToken)
+ *   "$func(#varName)"   — any placeholder function (e.g. "$toString(#clientId)")
+ * Plain strings are returned as-is.
+ */
+function resolveHeaders(headers) {
+  const resolved = {};
+  for (const [key, val] of Object.entries(headers)) {
+    if (typeof val !== 'string') { resolved[key] = val; continue; }
+
+    if (val.startsWith('#')) {
+      // Direct reference: "#xToken" → __ENV.xToken
+      const envKey = val.slice(1);
+      if (!Object.prototype.hasOwnProperty.call(__ENV, envKey)) {
+        throw new Error(`Header "${key}": env var "${envKey}" is not set. Pass it with -e ${envKey}=VALUE`);
+      }
+      resolved[key] = __ENV[envKey];
+    } else {
+      // Plain string or "$func(...)" placeholder — run through the same resolver as payload values
+      resolved[key] = resolveValue(val, {});
+    }
+  }
+  return resolved;
+}
+
 // ─── Template engine ──────────────────────────────────────────────────────────
 //
 // Two-pass approach to handle forward references like:
@@ -309,7 +335,7 @@ export default function () {
   const tpl    = templates[(__VU - 1) % templates.length];
   const method = (tpl.method || 'POST').toUpperCase();
   const url    = tpl.url;
-  const hdrs   = Object.assign({ 'Content-Type': 'application/json' }, tpl.headers || {});
+  const hdrs   = Object.assign({ 'Content-Type': 'application/json' }, resolveHeaders(tpl.headers || {}));
   const body   = JSON.stringify(generatePayload(tpl));
 
   let res;
