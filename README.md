@@ -99,7 +99,36 @@ docker run --rm \
 |----------|--------|-----------|
 | `TEMPLATES` | `/app/template.json` | Caminhos dos templates, separados por vírgula |
 | `SLEEP_SECONDS` | `0` | Pausa em segundos entre iterações por VU |
-| Qualquer outra | — | Acessível nos templates via `$toNumber(#varName)` / `$toString(#varName)` |
+| Qualquer outra | — | Acessível nos templates via `$toNumber(#varName)` / `$toString(#varName)` e diretamente nos headers via `#varName` |
+
+### Variáveis nos headers (segredos em runtime)
+
+Valores sensíveis como tokens e API keys **não devem ser escritos diretamente no arquivo de template**. Use a sintaxe `#varName` no valor do header — o valor será injetado em runtime via `-e`:
+
+```json
+"headers": {
+    "Content-Type": "application/json",
+    "x-client-id": "STRESS-TEST",
+    "x-token": "#xToken"
+}
+```
+
+```bash
+docker run --rm \
+  -v $(pwd)/template.json:/app/template.json \
+  local-stress-test run /app/stress_test.js \
+  -e xToken=meu-token-secreto \
+  --vus 10 --duration 30s
+```
+
+Também é possível usar qualquer placeholder de função nos headers:
+
+```json
+"headers": {
+    "x-client-id": "$toString(#clientId)",
+    "x-request-id": "$randomUUID()"
+}
+```
 
 ### Opções K6 no template vs CLI
 
