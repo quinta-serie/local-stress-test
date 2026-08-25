@@ -230,6 +230,7 @@ export const customFunctions = {
 | `$customFunction()` | Retorna `Date.now()` como string (Unix ms) |
 | `$paddedNumber(value, width)` | Preenche com zeros à esquerda. Ex: `$paddedNumber(42,6)` → `"000042"` |
 | `$randomChoice(a,b,c,...)` | Escolhe um dos valores aleatoriamente. Ex: `$randomChoice(A,B,C)` → `"B"` |
+| `$jwtAuth(loginUrl, username, password)` | Faz login (form-urlencoded) em `loginUrl`, espera uma resposta JSON `{ access_token, expires_at }`, e retorna `"Bearer <token>"`. O token é cacheado por VU e reutilizado até ~5s antes de expirar. Ex.: `"Authorization": "$jwtAuth(#loginUrl, #jwtUsername, #jwtPassword)"` |
 
 ### Funções built-in (não precisam estar em `custom_functions.js`)
 
