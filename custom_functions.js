@@ -12,6 +12,10 @@
  *
  * Functions MUST return a JSON-serialisable value: string, number, boolean or null.
  */
+import http from 'k6/http';
+
+const tokenCache = {}; // module-level state — persists across iterations within one VU
+
 export const customFunctions = {
   /**
    * $customFunction()
@@ -41,5 +45,35 @@ export const customFunctions = {
   randomChoice: (args, _env) => {
     if (!args.length) return null;
     return args[Math.floor(Math.random() * args.length)];
+  },
+
+  /**
+   * $jwtAuth(loginUrl, username, password)
+   * Logs in once per VU (form-urlencoded username/password) and caches the
+   * resulting bearer token until ~5s before it expires, reusing it on
+   * subsequent iterations instead of re-authenticating every request.
+   * Expects a JSON login response shaped as { access_token, expires_at }.
+   * Example: "Authorization": "$jwtAuth(#loginUrl, #jwtUsername, #jwtPassword)"
+   */
+  jwtAuth: (args, _env) => {
+    const [loginUrl, username, password] = args;
+    if (!loginUrl || !username || !password) {
+      throw new Error('$jwtAuth(loginUrl, username, password): all three arguments are required');
+    }
+    const cacheKey = `${loginUrl}|${username}`;
+    const cached = tokenCache[cacheKey];
+    if (cached && cached.expiresAt > Date.now() + 5000) {
+      return `Bearer ${cached.token}`;
+    }
+    const res = http.post(loginUrl, { username, password }, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      tags: { name: 'login' },
+    });
+    if (res.status !== 200) {
+      throw new Error(`$jwtAuth: login failed (${res.status}): ${res.body}`);
+    }
+    const body = res.json();
+    tokenCache[cacheKey] = { token: body.access_token, expiresAt: new Date(body.expires_at).getTime() };
+    return `Bearer ${body.access_token}`;
   },
 };
