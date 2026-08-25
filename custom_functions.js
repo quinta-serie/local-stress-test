@@ -60,11 +60,13 @@ export const customFunctions = {
     if (!loginUrl || !username || !password) {
       throw new Error('$jwtAuth(loginUrl, username, password): all three arguments are required');
     }
+
     const cacheKey = `${loginUrl}|${username}`;
     const cached = tokenCache[cacheKey];
     if (cached && cached.expiresAt > Date.now() + 5000) {
       return `Bearer ${cached.token}`;
     }
+
     const res = http.post(loginUrl, { username, password }, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       tags: { name: 'login' },
@@ -72,6 +74,7 @@ export const customFunctions = {
     if (res.status !== 200) {
       throw new Error(`$jwtAuth: login failed (${res.status}): ${res.body}`);
     }
+
     const body = res.json();
     tokenCache[cacheKey] = { token: body.access_token, expiresAt: new Date(body.expires_at).getTime() };
     return `Bearer ${body.access_token}`;
